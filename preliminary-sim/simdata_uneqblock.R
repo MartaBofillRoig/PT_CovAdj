@@ -63,6 +63,7 @@ simdata_blocked_unequal <- function(
     alloc2 = c(1/3, 1/3, 1/3),   # period 2: (0,1,2)
     alloc3 = c(0.5, 0.5),        # period 3: (0,2)
     lambda = 0,
+    trendp = "stepwise",
     sd=1
 ) {
   
@@ -94,7 +95,14 @@ simdata_blocked_unequal <- function(
   
   ## --- time trend and baseline covariate ---
   N <- N1 + N2 + N3
-  trend <- (0:(N - 1)) / N * lambda 
+  if(trendp == "linear"){
+    trend <- (0:(N - 1)) / N * lambda #linear
+  }
+  if(trendp == "stepwise"){
+    cj <- as.numeric(p)
+    trend <- as.numeric(lambda)*(cj-1) #stepwise
+  }
+
   x <- rnorm(N, mean = 0, sd = 1)
   
   ## --- potential outcomes ---
@@ -122,7 +130,7 @@ simdata_blocked_unequal <- function(
   ## --- observed outcome ---
   y <- (t == 0) * y0 + (t == 1) * y1 + (t == 2) * y2
   
-  data.frame(
+  dat <- data.frame(
     y = y,
     y0 = y0,
     y1 = y1,
@@ -131,6 +139,8 @@ simdata_blocked_unequal <- function(
     t = factor(t),
     p = p
   )
+  
+  return(dat)
 }
 
 ################
@@ -156,7 +166,7 @@ simdata_blocked_unequal <- function(
 # fit <- lm(y ~ t + p + x, data = dat)
 # summary(fit)
 # 
-# mu0 = 0; 
+# mu0 = 0;
 # mu1 = 1;
 # mu2 = 2;
 # beta=2;

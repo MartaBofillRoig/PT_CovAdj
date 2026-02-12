@@ -33,148 +33,70 @@ n <- 1000
 # --- define scenarios --- 
 scenarios <- list(
   # ===== BASELINE SCENARIOS =====
-  list(name = "Equal alloc, no trend", 
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 1, 
+  list(name = "Equal alloc, no trend (h0)",
+       mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
+       beta = 1,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 0,                       # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
-       alloc1 = c(1, 1)/2,        # P1: 50 control, 50 trt1
-       alloc2 = c(1, 1, 1)/3,     # P2: 33 control, 33 trt1, 33 trt2
-       alloc3 = c(1, 1)/2,        # P3: 50 control, 50 trt2
-       lambda = 0),
-  # Total: Control=133, Trt1=83, Trt2=83
+       alloc1 = c(0.5, 0.5),        # period 1: (0,1)
+       alloc2 = c(1/3, 1/3, 1/3),   # period 2: (0,1,2)
+       alloc3 = c(0.5, 0.5),        # period 3: (0,2)
+       lambda = 0,
+       trendp = "stepwise",
+       sd=1), 
   
-  list(name = "Unequal alloc, no trend",
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 1, 
-       N1 = n* 150, N2 = n* 300, N3 = n* 150,
-       alloc1 = c(2, 1)/3,        # P1: 100 control, 50 trt1
-       alloc2 = c(2, 1, 1)/4,     # P2: 150 control, 75 trt1, 75 trt2
-       alloc3 = c(2, 1)/3,        # P3: 100 control, 50 trt2
-       lambda = 0),
-  # Total: Control=350, Trt1=125, Trt2=125
+  list(name = "Unequal alloc, no trend (h0)",
+       mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
+       beta = 1,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 0,                       # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
+       alloc1 = c(2, 1)/3,
+       alloc2 = c(2, 1, 1)/4, 
+       alloc3 = c(2, 1)/3,
+       lambda = 0,
+       trendp = "stepwise",
+       sd=1), 
   
-  # ===== TREND SCENARIOS =====
-  list(name = "Equal alloc, strong trend",
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 1, 
+  list(name = "Unequal alloc, no trend (h1)",
+       mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
+       beta = 1,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 0,                       # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
+       alloc1 = c(2, 1)/3,
+       alloc2 = c(2, 1, 1)/4, 
+       alloc3 = c(2, 1)/3,
+       lambda = 0,
+       trendp = "stepwise",
+       sd=1), 
+  
+  # ===== TREATMENT-PERIOD INTERACTIONS =====
+  list(name = "Equal alloc, treat-period interaction (h0)",
+       mu0 = 0, mu1 = 0, mu2 = 0, beta = 0, 
+       tau1 = 3, tau2 = 0,   
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(1, 1)/2,
        alloc2 = c(1, 1, 1)/3,
        alloc3 = c(1, 1)/2,
-       lambda = 1),
-  # Total: Control=133, Trt1=83, Trt2=83
+       lambda = 1,
+       gamma1 = 0, gamma2 = 0,
+       delta = 0, trendp = "stepwise", sd=1),
   
-  list(name = "Unequal alloc, trend + large beta",
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, 
-       N1 = n* 150, N2 = n* 300, N3 = n* 150,
-       alloc1 = c(2, 1)/3,
-       alloc2 = c(2, 1, 1)/4,
-       alloc3 = c(2, 1)/3,
-       lambda = 1),
-  # Total: Control=350, Trt1=125, Trt2=125
-  
-  # ===== TREATMENT-COVARIATE INTERACTION =====
-  list(name = "Equal alloc, trend, treat-cov interaction", 
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, gamma1 = 2, gamma2 = 0,
+  list(name = "Equal alloc, treat-period interaction (h1)",
+       mu0 = 0, mu1 = 1, mu2 = 2, beta = 0, 
+       tau1 = 3, tau2 = 0,   
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(1, 1)/2,
        alloc2 = c(1, 1, 1)/3,
        alloc3 = c(1, 1)/2,
-       lambda = 1), 
-  # Total: Control=133, Trt1=83, Trt2=83
-  
-  list(name = "Unequal alloc, trend, treat-cov interaction", 
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, gamma1 = 2, gamma2 = 1,
-       N1 = n* 150, N2 = n* 300, N3 = n* 150,
-       alloc1 = c(2, 1)/3,
-       alloc2 = c(2, 1, 1)/4,
-       alloc3 = c(2, 1)/3,
-       lambda = 1),
-  # Total: Control=350, Trt1=125, Trt2=125
-  
-  # ===== PERIOD-COVARIATE INTERACTION =====
-  list(name = "Equal alloc, trend, period-cov interaction", 
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, delta = 2,
-       N1 = n* 100, N2 = n* 100, N3 = n* 100,
-       alloc1 = c(1, 1)/2,
-       alloc2 = c(1, 1, 1)/3,
-       alloc3 = c(1, 1)/2,
-       lambda = 1),
-  # Total: Control=133, Trt1=83, Trt2=83
-  
-  list(name = "Unequal alloc, trend, period-cov interaction", 
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, delta = 2,
-       N1 = n* 150, N2 = n* 300, N3 = n* 150,
-       alloc1 = c(2, 1)/3,
-       alloc2 = c(2, 1, 1)/4,
-       alloc3 = c(2, 1)/3,
-       lambda = 1),
-  # Total: Control=350, Trt1=125, Trt2=125
-  
-  # ===== TREATMENT-PERIOD INTERACTIONS (NEW) =====
-  list(name = "Equal alloc, treat-period interaction (waning trt1)",
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 1, 
-       tau1 = -1, tau2 = 0,  # Trt1 loses 1 unit per period
-       N1 = n* 100, N2 = n* 100, N3 = n* 100,
-       alloc1 = c(1, 1)/2,
-       alloc2 = c(1, 1, 1)/3,
-       alloc3 = c(1, 1)/2,
-       lambda = 1),
-  # Total: Control=133, Trt1=83, Trt2=83
-  # Effect trajectory: Trt1 goes 3→2→1, Trt2 stays at 2
-  
-  list(name = "Unequal alloc, treat-period interaction (delayed trt2)",
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 1,
-       tau1 = 0, tau2 = 1,  # Trt2 gains 1 unit per period
-       N1 = n* 150, N2 = n* 300, N3 = n* 150,
-       alloc1 = c(2, 1)/3,
-       alloc2 = c(2, 1, 1)/4,
-       alloc3 = c(2, 1)/3,
-       lambda = 1),
-  # Total: Control=350, Trt1=125, Trt2=125
-  # Effect trajectory: Trt1 stays at 2, Trt2 goes 0→1→2
-  
-  list(name = "Equal alloc, opposing treat-period effects",
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 1,
-       tau1 = -1, tau2 = 1,  # Trt1 wanes, Trt2 improves (strong effects)
-       N1 = n* 100, N2 = n* 100, N3 = n* 100,
-       alloc1 = c(1, 1)/2,
-       alloc2 = c(1, 1, 1)/3,
-       alloc3 = c(1, 1)/2,
-       lambda = 1),
-  # Total: Control=133, Trt1=83, Trt2=83
-  # Effect trajectory: Trt1: 3→2→1, Trt2: 0→1→2 (crossing effects!)
-  
-  list(name = "Unequal alloc, extreme all interactions",
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 2,
-       gamma1 = 2, gamma2 = -2,     # Strong opposing covariate effects
-       tau1 = 1, tau2 = -1,          # Opposing period trends
-       delta = 2,                    # Strong period-covariate interaction
-       N1 = n* 150, N2 = n* 300, N3 = n* 150,
-       alloc1 = c(2, 1)/3,
-       alloc2 = c(2, 1, 1)/4,
-       alloc3 = c(2, 1)/3,
-       lambda = 2),  # Even stronger time trend
-  # Total: Control=350, Trt1=125, Trt2=125 
-  
-  # ===== ADDITIONAL EXTREME SCENARIOS =====
-  list(name = "Equal alloc, extreme covariate interactions only",
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 3,
-       gamma1 = 3, gamma2 = -3,  # Very strong opposing interactions
-       N1 = n* 100, N2 = n* 100, N3 = n* 100,
-       alloc1 = c(1, 1)/2,
-       alloc2 = c(1, 1, 1)/3,
-       alloc3 = c(1, 1)/2,
-       lambda = 0),
-  # Total: Control=133, Trt1=83, Trt2=83 
-  
-  list(name = "Unequal alloc, extreme period effects",
-       mu0 = 0, mu1 = 1, mu2 = 2, beta = 1,
-       tau1 = 2, tau2 = 2,     # Both treatments improve dramatically
-       delta = 3,              # Period-covariate also very strong
-       N1 = n* 150, N2 = n* 300, N3 = n* 150,
-       alloc1 = c(2, 1)/3,
-       alloc2 = c(2, 1, 1)/4,
-       alloc3 = c(2, 1)/3,
-       lambda = 2)
-  # Total: Control=350, Trt1=125, Trt2=125 
+       lambda = 1,
+       gamma1 = 0, gamma2 = 0,
+       delta = 0, trendp = "stepwise", sd=1) 
 )
 
 # --- contrasts to compute: 1 vs 0 and 2 vs 0 ---
@@ -204,10 +126,13 @@ for (sc in scenarios) {
   
   dat <- simdata_blocked_unequal(
     mu0 = sc$mu0, mu1 = sc$mu1, mu2 = sc$mu2,
+    tau1 = sc$tau1, tau2 = sc$tau2,   
     beta = sc$beta,
     N1 = sc$N1, N2 = sc$N2, N3 = sc$N3,
     alloc1 = sc$alloc1, alloc2 = sc$alloc2, alloc3 = sc$alloc3,
-    lambda = sc$lambda
+    lambda = sc$lambda,
+    gamma1 = sc$gamma1, gamma2 = sc$gamma2,
+    delta = sc$delta, trendp = sc$trendp, sd=sc$sd
   )
   
   for (ctr in contrasts) {

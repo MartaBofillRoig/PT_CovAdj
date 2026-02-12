@@ -347,7 +347,4 @@ summary_stats
 save(combined_results, summary_stats, scenarios, n_sims,
      file = "simulation_results.RData") 
 
-################
-# Next steps: 
-#   implement binary
-################
+

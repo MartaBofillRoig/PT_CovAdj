@@ -1,0 +1,6 @@
+changelog
+- stepwise time trend added
+
+Pending
+- correct simstudy code -> revise parameters of the scenarios we considered
+- implement binary
