@@ -6,7 +6,8 @@
 
 rm(list=ls())
 
-setwd("C:/Users/marta.bofill/Dropbox/C5/RESEARCH/RCode/2026-02-NCC-covadj")
+setwd("C:/Users/marta/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
+# setwd("C:/Users/marta.bofill/Dropbox/C5/RESEARCH/RCode/2026-02-NCC-covadj")
 # setwd("C:/Users/marta/Dropbox/C5/RESEARCH/RCode/2026-02-NCC-covadj")
 
 ################
@@ -28,13 +29,13 @@ library(dplyr)
 # LOOP SIM 1 trial
 
 set.seed(1225)
-
+n <- 1000
 # --- define scenarios --- 
 scenarios <- list(
   # ===== BASELINE SCENARIOS =====
   list(name = "Equal alloc, no trend", 
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 1, 
-       N1 = 100, N2 = 100, N3 = 100,
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(1, 1)/2,        # P1: 50 control, 50 trt1
        alloc2 = c(1, 1, 1)/3,     # P2: 33 control, 33 trt1, 33 trt2
        alloc3 = c(1, 1)/2,        # P3: 50 control, 50 trt2
@@ -43,7 +44,7 @@ scenarios <- list(
   
   list(name = "Unequal alloc, no trend",
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 1, 
-       N1 = 150, N2 = 300, N3 = 150,
+       N1 = n* 150, N2 = n* 300, N3 = n* 150,
        alloc1 = c(2, 1)/3,        # P1: 100 control, 50 trt1
        alloc2 = c(2, 1, 1)/4,     # P2: 150 control, 75 trt1, 75 trt2
        alloc3 = c(2, 1)/3,        # P3: 100 control, 50 trt2
@@ -53,7 +54,7 @@ scenarios <- list(
   # ===== TREND SCENARIOS =====
   list(name = "Equal alloc, strong trend",
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 1, 
-       N1 = 100, N2 = 100, N3 = 100,
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(1, 1)/2,
        alloc2 = c(1, 1, 1)/3,
        alloc3 = c(1, 1)/2,
@@ -62,7 +63,7 @@ scenarios <- list(
   
   list(name = "Unequal alloc, trend + large beta",
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, 
-       N1 = 150, N2 = 300, N3 = 150,
+       N1 = n* 150, N2 = n* 300, N3 = n* 150,
        alloc1 = c(2, 1)/3,
        alloc2 = c(2, 1, 1)/4,
        alloc3 = c(2, 1)/3,
@@ -72,7 +73,7 @@ scenarios <- list(
   # ===== TREATMENT-COVARIATE INTERACTION =====
   list(name = "Equal alloc, trend, treat-cov interaction", 
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, gamma1 = 2, gamma2 = 0,
-       N1 = 100, N2 = 100, N3 = 100,
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(1, 1)/2,
        alloc2 = c(1, 1, 1)/3,
        alloc3 = c(1, 1)/2,
@@ -81,7 +82,7 @@ scenarios <- list(
   
   list(name = "Unequal alloc, trend, treat-cov interaction", 
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, gamma1 = 2, gamma2 = 1,
-       N1 = 150, N2 = 300, N3 = 150,
+       N1 = n* 150, N2 = n* 300, N3 = n* 150,
        alloc1 = c(2, 1)/3,
        alloc2 = c(2, 1, 1)/4,
        alloc3 = c(2, 1)/3,
@@ -91,7 +92,7 @@ scenarios <- list(
   # ===== PERIOD-COVARIATE INTERACTION =====
   list(name = "Equal alloc, trend, period-cov interaction", 
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, delta = 2,
-       N1 = 100, N2 = 100, N3 = 100,
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(1, 1)/2,
        alloc2 = c(1, 1, 1)/3,
        alloc3 = c(1, 1)/2,
@@ -100,7 +101,7 @@ scenarios <- list(
   
   list(name = "Unequal alloc, trend, period-cov interaction", 
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 2, delta = 2,
-       N1 = 150, N2 = 300, N3 = 150,
+       N1 = n* 150, N2 = n* 300, N3 = n* 150,
        alloc1 = c(2, 1)/3,
        alloc2 = c(2, 1, 1)/4,
        alloc3 = c(2, 1)/3,
@@ -111,7 +112,7 @@ scenarios <- list(
   list(name = "Equal alloc, treat-period interaction (waning trt1)",
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 1, 
        tau1 = -1, tau2 = 0,  # Trt1 loses 1 unit per period
-       N1 = 100, N2 = 100, N3 = 100,
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(1, 1)/2,
        alloc2 = c(1, 1, 1)/3,
        alloc3 = c(1, 1)/2,
@@ -122,7 +123,7 @@ scenarios <- list(
   list(name = "Unequal alloc, treat-period interaction (delayed trt2)",
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 1,
        tau1 = 0, tau2 = 1,  # Trt2 gains 1 unit per period
-       N1 = 150, N2 = 300, N3 = 150,
+       N1 = n* 150, N2 = n* 300, N3 = n* 150,
        alloc1 = c(2, 1)/3,
        alloc2 = c(2, 1, 1)/4,
        alloc3 = c(2, 1)/3,
@@ -133,7 +134,7 @@ scenarios <- list(
   list(name = "Equal alloc, opposing treat-period effects",
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 1,
        tau1 = -1, tau2 = 1,  # Trt1 wanes, Trt2 improves (strong effects)
-       N1 = 100, N2 = 100, N3 = 100,
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(1, 1)/2,
        alloc2 = c(1, 1, 1)/3,
        alloc3 = c(1, 1)/2,
@@ -146,7 +147,7 @@ scenarios <- list(
        gamma1 = 2, gamma2 = -2,     # Strong opposing covariate effects
        tau1 = 1, tau2 = -1,          # Opposing period trends
        delta = 2,                    # Strong period-covariate interaction
-       N1 = 150, N2 = 300, N3 = 150,
+       N1 = n* 150, N2 = n* 300, N3 = n* 150,
        alloc1 = c(2, 1)/3,
        alloc2 = c(2, 1, 1)/4,
        alloc3 = c(2, 1)/3,
@@ -157,7 +158,7 @@ scenarios <- list(
   list(name = "Equal alloc, extreme covariate interactions only",
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 3,
        gamma1 = 3, gamma2 = -3,  # Very strong opposing interactions
-       N1 = 100, N2 = 100, N3 = 100,
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(1, 1)/2,
        alloc2 = c(1, 1, 1)/3,
        alloc3 = c(1, 1)/2,
@@ -168,7 +169,7 @@ scenarios <- list(
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 1,
        tau1 = 2, tau2 = 2,     # Both treatments improve dramatically
        delta = 3,              # Period-covariate also very strong
-       N1 = 150, N2 = 300, N3 = 150,
+       N1 = n* 150, N2 = n* 300, N3 = n* 150,
        alloc1 = c(2, 1)/3,
        alloc2 = c(2, 1, 1)/4,
        alloc3 = c(2, 1)/3,

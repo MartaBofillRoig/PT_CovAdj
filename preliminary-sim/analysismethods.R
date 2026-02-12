@@ -16,10 +16,10 @@ lmmodel <- function(data, trt = 1, dataset="ACA") {
   
   # analysis data 
   if(dataset=="ACA"){
-    d <- subset(data, t %in% c(0,trt))  # ACA data
+    d <- subset(data, t %in% c(0,trt) & p %in% cc_periods)  # ACA data
   }
   if(dataset=="LACA"){
-    d <- subset(data, p %in% max(cc_periods)) # LACA data
+    d <- subset(data, t %in% c(0,trt) & p %in% max(cc_periods)) # LACA data
   }
   if(dataset=="ECE"){
     d <- subset(data, p %in% cc_periods) # ECE data
@@ -52,10 +52,10 @@ g_estimate <- function(data, trt = 1, dataset="ACA") {
   
   # data to predict marginal means
   if(dataset=="ACA"){
-    d <- subset(data, t %in% c(0,trt))  # ACA data
+    d <- subset(data, t %in% c(0,trt) & p %in% cc_periods)  # ACA data
   }
   if(dataset=="LACA"){
-    d <- subset(data, p %in% max(cc_periods)) # LACA data
+    d <- subset(data, t %in% c(0,trt) & p %in% max(cc_periods)) # LACA data
   }
   if(dataset=="ECE"){
     d <- subset(data, p %in% cc_periods) # ECE data
@@ -65,7 +65,7 @@ g_estimate <- function(data, trt = 1, dataset="ACA") {
     if(trt==1){
       d <- subset(data, p %in% cc_periods) # ECE data
     }
-  }  
+  }   
   
   # outcome model
   fit <- lm(y ~ as.factor(t) + as.factor(p) + x, data = d)
@@ -132,7 +132,8 @@ aipw_estimate <- function(data, trt = 1, period_of_interest = NULL) {
   
   # Outcome model 
   # Subset to relevant treatments
-  d <- subset(data, t %in% c(0,trt))  # by default ACA data
+  cc_periods <- which(as.vector(table(data$t, data$p)[trt+1,])>0)
+  d <- subset(data, t %in% c(0,trt) & p %in% cc_periods) # by default ACA data
   
   # cc_periods <- which(as.vector(table(data$t, data$p)[trt+1,])>0)
   # d <- subset(data, p %in% cc_periods) # ECE data
