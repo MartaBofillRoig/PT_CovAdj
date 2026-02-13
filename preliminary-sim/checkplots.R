@@ -1,7 +1,7 @@
 n = 1000;
 sc <- list(name = "Equal alloc, treat-period interaction (waning trt1)",
      mu0 = 0, mu1 = 1, mu2 = 2, beta = 0, 
-     tau1 = 3, tau2 = 1,   
+     tau1 = 3, tau2 = 0,   
      N1 = n* 100, N2 = n* 100, N3 = n* 100,
      alloc1 = c(1, 1)/2,
      alloc2 = c(1, 1, 1)/3,

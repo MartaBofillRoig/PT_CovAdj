@@ -6,9 +6,8 @@
 
 rm(list=ls())
 
-setwd("C:/Users/marta/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
-# setwd("C:/Users/marta.bofill/Dropbox/C5/RESEARCH/RCode/2026-02-NCC-covadj")
-# setwd("C:/Users/marta/Dropbox/C5/RESEARCH/RCode/2026-02-NCC-covadj")
+setwd("C:/Users/marta.bofill/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
+# setwd("C:/Users/marta/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim") 
 
 ################
 
@@ -75,6 +74,77 @@ scenarios <- list(
        trendp = "stepwise",
        sd=1), 
   
+  # ===== COVARIATE-PERIOD INTERACTIONS =====
+  list(name = "Equal alloc, no trend, cov-period interaction (h0)",
+       mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
+       beta = 1,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 5,                       # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
+       alloc1 = c(0.5, 0.5),        # period 1: (0,1)
+       alloc2 = c(1/3, 1/3, 1/3),   # period 2: (0,1,2)
+       alloc3 = c(0.5, 0.5),        # period 3: (0,2)
+       lambda = 0,
+       trendp = "stepwise",
+       sd=1), 
+  
+  list(name = "Equal alloc, no trend, cov-period interaction (h1)",
+       mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
+       beta = 1,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 5,                       # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
+       alloc1 = c(0.5, 0.5),        # period 1: (0,1)
+       alloc2 = c(1/3, 1/3, 1/3),   # period 2: (0,1,2)
+       alloc3 = c(0.5, 0.5),        # period 3: (0,2)
+       lambda = 0,
+       trendp = "stepwise",
+       sd=1), 
+  
+  list(name = "Unequal alloc, no trend, cov-period interaction (h0)",
+       mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
+       beta = 1,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 5,                       # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
+       alloc1 = c(2, 1)/3,
+       alloc2 = c(2, 1, 1)/4, 
+       alloc3 = c(2, 1)/3,
+       lambda = 0,
+       trendp = "stepwise",
+       sd=1), 
+  
+  list(name = "Unequal alloc, no trend, cov-period interaction (h1)",
+       mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
+       beta = 1,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 5,                       # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
+       alloc1 = c(2, 1)/3,
+       alloc2 = c(2, 1, 1)/4, 
+       alloc3 = c(2, 1)/3,
+       lambda = 0,
+       trendp = "stepwise",
+       sd=1), 
+  
+  # list(name = "Unequal alloc, no trend (h1)",
+  #      mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
+  #      beta = 1,                        # baseline covariate effect
+  #      gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+  #      delta = 0,                       # period-covariate interaction
+  #      tau1 = 0, tau2 = 0,              # treatment-period interactions
+  #      N1 = n* 100, N2 = n* 100, N3 = n* 100,
+  #      alloc1 = c(2, 1)/3,
+  #      alloc2 = c(2, 1, 1)/4, 
+  #      alloc3 = c(2, 1)/3,
+  #      lambda = 0,
+  #      trendp = "stepwise",
+  #      sd=1), 
+  
   # ===== TREATMENT-PERIOD INTERACTIONS =====
   list(name = "Equal alloc, treat-period interaction (h0)",
        mu0 = 0, mu1 = 0, mu2 = 0, beta = 0, 
@@ -111,6 +181,8 @@ add_result <- function(results, sc, trt, method, dataset, out) {
       Contrast = trt,
       Method   = method,
       Dataset  = dataset,
+      Estimandm = estm,
+      Estimandc = estc,
       Est      = out["est"],
       Var      = out["var"],
       SE       = out["se"],
@@ -141,6 +213,9 @@ for (sc in scenarios) {
     
     ## --- Linear model ---
     results <- add_result(results, sc, trt, "LM", "ACA",
+                          
+                          Estimandm = estm,
+                          Estimandc = estc,
                           lmmodel(dat, trt = trt, dataset = "ACA"))
     
     results <- add_result(results, sc, trt, "LM", "ECE",

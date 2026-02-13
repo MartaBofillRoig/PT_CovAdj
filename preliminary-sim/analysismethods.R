@@ -110,27 +110,6 @@ g_estimate <- function(data, trt = 1, dataset="ACA") {
 # aipw estimation
 aipw_estimate <- function(data, trt = 1, period_of_interest = NULL) {
   
-  # Propensity scores: known from randomization
-  # table(data$t, data$p)
-  # pi_hat_p1 <- table(data$t, data$p)[,1]/sum(table(data$t, data$p)[,1])
-  # pi_hat_p2 <- table(data$t, data$p)[,2]/sum(table(data$t, data$p)[,2])
-  # pi_hat_p3 <- table(data$t, data$p)[,3]/sum(table(data$t, data$p)[,3])
-  # pi_hat <- matrix(c(pi_hat_p1, pi_hat_p2, pi_hat_p3), nrow=3)
-  
-  pi_hat <- numeric(nrow(data))
-  # create pi_hat per ind: loop over periods
-  for (period_level in levels(data$p)) {
-    idx <- which(data$p == period_level)
-    t_counts <- table(data$t[idx])
-    prop <- t_counts / sum(t_counts)  # pi(A | S=period)
-    
-    # assign propensity to each ind
-    pi_hat[idx] <- prop[as.character(data$t[idx])]
-  }
-  
-  data$pi_hat <- pi_hat
-  
-  # Outcome model 
   # Subset to relevant treatments
   cc_periods <- which(as.vector(table(data$t, data$p)[trt+1,])>0)
   d <- subset(data, t %in% c(0,trt) & p %in% cc_periods) # by default ACA data
@@ -138,6 +117,27 @@ aipw_estimate <- function(data, trt = 1, period_of_interest = NULL) {
   # cc_periods <- which(as.vector(table(data$t, data$p)[trt+1,])>0)
   # d <- subset(data, p %in% cc_periods) # ECE data
   
+  # Propensity scores: known from randomization
+  # table(data$t, data$p)
+  # pi_hat_p1 <- table(data$t, data$p)[,1]/sum(table(data$t, data$p)[,1])
+  # pi_hat_p2 <- table(data$t, data$p)[,2]/sum(table(data$t, data$p)[,2])
+  # pi_hat_p3 <- table(data$t, data$p)[,3]/sum(table(data$t, data$p)[,3])
+  # pi_hat <- matrix(c(pi_hat_p1, pi_hat_p2, pi_hat_p3), nrow=3)
+  
+  pi_hat <- numeric(nrow(d))
+  # create pi_hat per ind: loop over periods
+  for (period_level in levels(d$p)) {
+    idx <- which(d$p == period_level)
+    t_counts <- table(d$t[idx])
+    prop <- t_counts / sum(t_counts)  # pi(A | S=period)
+    
+    # assign propensity to each ind
+    pi_hat[idx] <- prop[as.character(d$t[idx])]
+  }
+  
+  d$pi_hat <- pi_hat
+  
+  # Outcome model 
   fit <- lm(y ~ as.factor(t) + as.factor(p) + x, data = d)
   
   # Predicted outcomes for treatment 0 and treatment of interest
