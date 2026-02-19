@@ -41,7 +41,10 @@ lmmodel <- function(data, trt = 1, dataset="ACA") {
   coef_var <- vc[coef_name, coef_name] # Variance of the coefficient
   coef_sd <- sqrt(coef_var) # Standard deviation (standard error)
   
-  return(c(est=lm_coef, var=coef_var, se=coef_sd))
+  # estimand
+  esd_m <- as.numeric(colMeans(d[2+as.numeric(trt)]))-mean(d$y0)
+  
+  return(c(est=lm_coef, var=coef_var, se=coef_sd, esd_m=esd_m))
 }
 
 ################
@@ -103,7 +106,10 @@ g_estimate <- function(data, trt = 1, dataset="ACA") {
   # g_var <- var(d$gdiff)/n
   # g_se <- sqrt(g_var) 
   
-  return(c(est=g_diffmeans, var=g_var, se=g_se))
+  # estimand
+  esd_m <- as.numeric(colMeans(d[2+as.numeric(trt)]))-mean(d$y0)
+  
+  return(c(est=g_diffmeans, var=g_var, se=g_se, esd_m=esd_m))
 }
 
 ################
@@ -171,7 +177,10 @@ aipw_estimate <- function(data, trt = 1, period_of_interest = NULL) {
   var_hat <- var_psi/n
   se_hat  <- sqrt(var_hat)
   
-  return(c(est=psi_hat, var=var_hat, se=se_hat))
+  # estimand
+  esd_m <- as.numeric(colMeans(d[2+as.numeric(trt)]))-mean(d$y0)
+  
+  return(c(est=psi_hat, var=var_hat, se=se_hat, esd_m=esd_m))
 }
 
 

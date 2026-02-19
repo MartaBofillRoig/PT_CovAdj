@@ -6,8 +6,8 @@
 
 rm(list=ls())
 
-setwd("C:/Users/marta.bofill/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
-# setwd("C:/Users/marta/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim") 
+# setwd("C:/Users/marta.bofill/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
+setwd("C:/Users/marta/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
 
 ################
 
@@ -28,7 +28,7 @@ library(dplyr)
 # LOOP SIM 1 trial
 
 set.seed(1225)
-n <- 1000
+n <- 10000
 # --- define scenarios --- 
 scenarios <- list(
   # ===== BASELINE SCENARIOS =====
@@ -36,7 +36,7 @@ scenarios <- list(
        mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
        beta = 1,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
-       delta = 0,                       # period-covariate interaction
+       delta = 0, subgroup = F,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(0.5, 0.5),        # period 1: (0,1)
@@ -50,7 +50,7 @@ scenarios <- list(
        mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
        beta = 1,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
-       delta = 0,                       # period-covariate interaction
+       delta = 0, subgroup = F,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(2, 1)/3,
@@ -64,7 +64,7 @@ scenarios <- list(
        mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
        beta = 1,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
-       delta = 0,                       # period-covariate interaction
+       delta = 0, subgroup = F,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(2, 1)/3,
@@ -77,9 +77,9 @@ scenarios <- list(
   # ===== COVARIATE-PERIOD INTERACTIONS =====
   list(name = "Equal alloc, no trend, cov-period interaction (h0)",
        mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
-       beta = 1,                        # baseline covariate effect
+       beta = 2,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
-       delta = 5,                       # period-covariate interaction
+       delta = 0, subgroup = T,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(0.5, 0.5),        # period 1: (0,1)
@@ -91,9 +91,9 @@ scenarios <- list(
   
   list(name = "Equal alloc, no trend, cov-period interaction (h1)",
        mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
-       beta = 1,                        # baseline covariate effect
+       beta = 2,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
-       delta = 5,                       # period-covariate interaction
+       delta = 0, subgroup = T,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(0.5, 0.5),        # period 1: (0,1)
@@ -105,9 +105,9 @@ scenarios <- list(
   
   list(name = "Unequal alloc, no trend, cov-period interaction (h0)",
        mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
-       beta = 1,                        # baseline covariate effect
+       beta = 2,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
-       delta = 5,                       # period-covariate interaction
+       delta = 0, subgroup = T,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(2, 1)/3,
@@ -119,9 +119,9 @@ scenarios <- list(
   
   list(name = "Unequal alloc, no trend, cov-period interaction (h1)",
        mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
-       beta = 1,                        # baseline covariate effect
+       beta = 2,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
-       delta = 5,                       # period-covariate interaction
+       delta = 0, subgroup = T,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
        alloc1 = c(2, 1)/3,
@@ -155,7 +155,8 @@ scenarios <- list(
        alloc3 = c(1, 1)/2,
        lambda = 1,
        gamma1 = 0, gamma2 = 0,
-       delta = 0, trendp = "stepwise", sd=1),
+       delta = 0, subgroup = T,         # period-covariate interaction
+       trendp = "stepwise", sd=1),
   
   list(name = "Equal alloc, treat-period interaction (h1)",
        mu0 = 0, mu1 = 1, mu2 = 2, beta = 0, 
@@ -166,7 +167,8 @@ scenarios <- list(
        alloc3 = c(1, 1)/2,
        lambda = 1,
        gamma1 = 0, gamma2 = 0,
-       delta = 0, trendp = "stepwise", sd=1) 
+       delta = 0, subgroup = T,         # period-covariate interaction
+       trendp = "stepwise", sd=1) 
 )
 
 # --- contrasts to compute: 1 vs 0 and 2 vs 0 ---
@@ -180,12 +182,11 @@ add_result <- function(results, sc, trt, method, dataset, out) {
       Scenario = sc$name,
       Contrast = trt,
       Method   = method,
-      Dataset  = dataset,
-      Estimandm = estm,
-      Estimandc = estc,
+      Dataset  = dataset, 
       Est      = out["est"],
       Var      = out["var"],
       SE       = out["se"],
+      Estimandm = out["esd_m"], 
       stringsAsFactors = FALSE
     )
   )
@@ -204,7 +205,8 @@ for (sc in scenarios) {
     alloc1 = sc$alloc1, alloc2 = sc$alloc2, alloc3 = sc$alloc3,
     lambda = sc$lambda,
     gamma1 = sc$gamma1, gamma2 = sc$gamma2,
-    delta = sc$delta, trendp = sc$trendp, sd=sc$sd
+    delta = sc$delta, subgroup = sc$subgroup,
+    trendp = sc$trendp, sd=sc$sd
   )
   
   for (ctr in contrasts) {
@@ -212,10 +214,7 @@ for (sc in scenarios) {
     trt <- ctr[1]
     
     ## --- Linear model ---
-    results <- add_result(results, sc, trt, "LM", "ACA",
-                          
-                          Estimandm = estm,
-                          Estimandc = estc,
+    results <- add_result(results, sc, trt, "LM", "ACA", 
                           lmmodel(dat, trt = trt, dataset = "ACA"))
     
     results <- add_result(results, sc, trt, "LM", "ECE",
@@ -247,6 +246,19 @@ for (sc in scenarios) {
 ################
 # RESULTS
 results 
+results$bias <- results$Est - results$Estimandm
+results
+
+results[results$Scenario=="Equal alloc, no trend (h0)",]
+results[results$Scenario=="Unequal alloc, no trend (h0)",]
+results[results$Scenario=="Unequal alloc, no trend (h1)",]
+results[results$Scenario=="Equal alloc, no trend, cov-period interaction (h0)",]
+results[results$Scenario=="Equal alloc, no trend, cov-period interaction (h1)",]
+results[results$Scenario=="Unequal alloc, no trend, cov-period interaction (h0)",]
+results[results$Scenario=="Unequal alloc, no trend, cov-period interaction (h1)",]
+results[results$Scenario=="Equal alloc, treat-period interaction (h1)",]
+results[results$Scenario=="Equal alloc, treat-period interaction (h0)",]
+
 
 kable(results, format = "latex", booktabs = TRUE, digits=3) 
 # kable(results,  booktabs = TRUE, digits=3) 

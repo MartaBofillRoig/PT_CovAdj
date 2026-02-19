@@ -64,7 +64,8 @@ simdata_blocked_unequal <- function(
     alloc3 = c(0.5, 0.5),        # period 3: (0,2)
     lambda = 0,
     trendp = "stepwise",
-    sd=1
+    sd=1,
+    subgroup=F
 ) {
   
   stopifnot(abs(sum(alloc1)-1) < 1e-5,
@@ -105,6 +106,21 @@ simdata_blocked_unequal <- function(
 
   x <- rnorm(N, mean = 0, sd = 1)
   
+  if(subgroup==T){
+    # Two subgroups based on a covariate
+    x1 <- rnorm(N, mean = 0, sd = 1)
+    x2 <- rnorm(N, mean = 2, sd = 1)
+    # Proportion of subgroup per period
+    p1_x1 <- 0.5
+    p2_x1 <- 0.4
+    p3_x1 <- 0.2
+    
+    x <- c(
+      sample(c(sample(x1, round(p1_x1*N1)), sample(x2, N1-round(p1_x1*N1)))),
+      sample(c(sample(x1, round(p2_x1*N2)), sample(x2, N2-round(p2_x1*N2)))),
+      sample(c(sample(x1, round(p3_x1*N3)), sample(x2, N3-round(p3_x1*N3))))
+    )
+  }
   ## --- potential outcomes ---
   mu <- c(mu0, mu1, mu2)
   
