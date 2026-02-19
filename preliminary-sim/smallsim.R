@@ -155,7 +155,7 @@ scenarios <- list(
        alloc3 = c(1, 1)/2,
        lambda = 1,
        gamma1 = 0, gamma2 = 0,
-       delta = 0, subgroup = T,         # period-covariate interaction
+       delta = 0, subgroup = F,         # period-covariate interaction
        trendp = "stepwise", sd=1),
   
   list(name = "Equal alloc, treat-period interaction (h1)",
@@ -167,7 +167,7 @@ scenarios <- list(
        alloc3 = c(1, 1)/2,
        lambda = 1,
        gamma1 = 0, gamma2 = 0,
-       delta = 0, subgroup = T,         # period-covariate interaction
+       delta = 0, subgroup = F,         # period-covariate interaction
        trendp = "stepwise", sd=1) 
 )
 
