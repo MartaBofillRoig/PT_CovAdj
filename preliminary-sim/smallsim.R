@@ -34,7 +34,7 @@ scenarios <- list(
   # ===== BASELINE SCENARIOS =====
   list(name = "Equal alloc, no trend (h0)",
        mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
-       beta = 1,                        # baseline covariate effect
+       beta = 0,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
        delta = 0, subgroup = F,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
@@ -48,7 +48,7 @@ scenarios <- list(
   
   list(name = "Unequal alloc, no trend (h0)",
        mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
-       beta = 1,                        # baseline covariate effect
+       beta = 0,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
        delta = 0, subgroup = F,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
@@ -62,7 +62,7 @@ scenarios <- list(
   
   list(name = "Unequal alloc, no trend (h1)",
        mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
-       beta = 1,                        # baseline covariate effect
+       beta = 0,                        # baseline covariate effect
        gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
        delta = 0, subgroup = F,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
@@ -71,6 +71,77 @@ scenarios <- list(
        alloc2 = c(2, 1, 1)/4, 
        alloc3 = c(2, 1)/3,
        lambda = 0,
+       trendp = "stepwise",
+       sd=1), 
+  
+  list(name = "Unequal alloc, trend (h1)",
+       mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
+       beta = 0,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 0, subgroup = F,         # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
+       alloc1 = c(2, 1)/3,
+       alloc2 = c(2, 1, 1)/4, 
+       alloc3 = c(2, 1)/3,
+       lambda = 1,
+       trendp = "stepwise",
+       sd=1), 
+  
+  list(name = "Equal alloc, trend, diff sizes N (h1)",
+       mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
+       beta = 0,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 0, subgroup = F,         # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 50, N2 = n* 150, N3 = n* 100,
+       alloc1 = c(0.5, 0.5),        # period 1: (0,1)
+       alloc2 = c(1/3, 1/3, 1/3),   # period 2: (0,1,2)
+       alloc3 = c(0.5, 0.5),        # period 3: (0,2)
+       lambda = 1,
+       trendp = "stepwise",
+       sd=1), 
+  
+  # ===== COVARIATE EFFECTS =====
+  list(name = "Equal alloc, no trend, with cov effect (h0)",
+       mu0 = 0, mu1 = 0, mu2 = 0,      # treatment main effects
+       beta = 2,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 0, subgroup = F,         # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
+       alloc1 = c(0.5, 0.5),        # period 1: (0,1)
+       alloc2 = c(1/3, 1/3, 1/3),   # period 2: (0,1,2)
+       alloc3 = c(0.5, 0.5),        # period 3: (0,2)
+       lambda = 0,
+       trendp = "stepwise",
+       sd=1), 
+  
+  list(name = "Unequal alloc, trend, with cov effect (h1)",
+       mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
+       beta = 2,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 0, subgroup = F,         # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 100, N2 = n* 100, N3 = n* 100,
+       alloc1 = c(2, 1)/3,
+       alloc2 = c(2, 1, 1)/4, 
+       alloc3 = c(2, 1)/3,
+       lambda = 1,
+       trendp = "stepwise",
+       sd=1), 
+  
+  list(name = "Equal alloc, trend, diff sizes N, with cov effect (h1)",
+       mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
+       beta = 2,                        # baseline covariate effect
+       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       delta = 0, subgroup = F,         # period-covariate interaction
+       tau1 = 0, tau2 = 0,              # treatment-period interactions
+       N1 = n* 50, N2 = n* 150, N3 = n* 100,
+       alloc1 = c(0.5, 0.5),        # period 1: (0,1)
+       alloc2 = c(1/3, 1/3, 1/3),   # period 2: (0,1,2)
+       alloc3 = c(0.5, 0.5),        # period 3: (0,2)
+       lambda = 1,
        trendp = "stepwise",
        sd=1), 
   
@@ -129,21 +200,7 @@ scenarios <- list(
        alloc3 = c(2, 1)/3,
        lambda = 0,
        trendp = "stepwise",
-       sd=1), 
-  
-  # list(name = "Unequal alloc, no trend (h1)",
-  #      mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
-  #      beta = 1,                        # baseline covariate effect
-  #      gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
-  #      delta = 0,                       # period-covariate interaction
-  #      tau1 = 0, tau2 = 0,              # treatment-period interactions
-  #      N1 = n* 100, N2 = n* 100, N3 = n* 100,
-  #      alloc1 = c(2, 1)/3,
-  #      alloc2 = c(2, 1, 1)/4, 
-  #      alloc3 = c(2, 1)/3,
-  #      lambda = 0,
-  #      trendp = "stepwise",
-  #      sd=1), 
+       sd=1),  
   
   # ===== TREATMENT-PERIOD INTERACTIONS =====
   list(name = "Equal alloc, treat-period interaction (h0)",

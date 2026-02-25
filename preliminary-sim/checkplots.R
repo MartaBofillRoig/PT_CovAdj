@@ -1,14 +1,16 @@
+
 n = 1000;
-sc <- list(name = "Equal alloc, treat-period interaction (waning trt1)",
-     mu0 = 0, mu1 = 1, mu2 = 2, beta = 0, 
-     tau1 = 3, tau2 = 0,   
-     N1 = n* 100, N2 = n* 100, N3 = n* 100,
-     alloc1 = c(1, 1)/2,
-     alloc2 = c(1, 1, 1)/3,
-     alloc3 = c(1, 1)/2,
-     lambda = 1,
-     gamma1 = 0, gamma2 = 0,
-     delta = 0, trendp = "stepwise", sd=1)
+sc <- list(name = "Equal alloc, treat-period interaction (h1)",
+           mu0 = 0, mu1 = 1, mu2 = 2, beta = 0, 
+           tau1 = 3, tau2 = 0,   
+           N1 = n* 100, N2 = n* 100, N3 = n* 100,
+           alloc1 = c(1, 1)/2,
+           alloc2 = c(1, 1, 1)/3,
+           alloc3 = c(1, 1)/2,
+           lambda = 1,
+           gamma1 = 0, gamma2 = 0,
+           delta = 0, subgroup = F,         # period-covariate interaction
+           trendp = "stepwise", sd=1) 
 
 # n=1000;
 # mu0 = 0; mu1 = 1; mu2 = 2; beta = 0;
@@ -33,9 +35,7 @@ dat <- simdata_blocked_unequal(
   delta = 0, trendp = "stepwise", sd=1
 )
 
-
-
-# Plot means per period for different treatments
+# 
 library(ggplot2)
 library(dplyr)
 
@@ -50,58 +50,37 @@ means_summary <- dat %>%
   )
 means_summary
 
+# 2 vs 0 -> ACA
+N_ACA= sc$N2*(2/3)+sc$N3
+(means_summary[7,]$mean_y*(sc$N3/N_ACA) + means_summary[5,]$mean_y*(sc$N2*(2/3)/N_ACA))-(means_summary[6,]$mean_y*(sc$N3/N_ACA) + means_summary[3,]$mean_y*(sc$N2*(2/3)/N_ACA))
 
+# 1 vs 0 -> ACA
+N_ACA= sc$N2*(2/3)+sc$N1
+(means_summary[4,]$mean_y*(sc$N2*(2/3)/N_ACA) + means_summary[2,]$mean_y*(sc$N1/N_ACA))-(means_summary[3,]$mean_y*(sc$N2*(2/3)/N_ACA) + means_summary[1,]$mean_y*(sc$N1/N_ACA))
+
+# 1 vs 0 -> ECE
+N_ECE= sc$N2+sc$N1
+(means_summary[4,]$mean_y*(sc$N2/N_ECE) + means_summary[2,]$mean_y*(sc$N1/N_ECE))-(means_summary[3,]$mean_y*(sc$N2/N_ECE) + means_summary[1,]$mean_y*(sc$N1/N_ECE))
+
+# 
+lmmodel(dat, trt = 1, dataset = "ACA")
+lmmodel(dat, trt = 1, dataset = "ECE")
+lmmodel(dat, trt = 1, dataset = "NCC")
+
+# 
 lmmodel(dat, trt = 2, dataset = "ACA")
 lmmodel(dat, trt = 2, dataset = "ECE")
 lmmodel(dat, trt = 2, dataset = "NCC")
+
+############################################
 
 # Create observation index
 dat <- dat %>%
   arrange(p, t) %>%
   mutate(obs_index = row_number())
 
-
-
-# Plot 1: Individual observations with means overlaid
-p1 <- ggplot() +
-  geom_point(data = dat, 
-             aes(x = obs_index, y = y, color = as.factor(t)), 
-             alpha = 0.3, size = 1) +
-  geom_vline(data = dat %>% 
-               group_by(p) %>% 
-               summarise(period_start = min(obs_index), .groups = 'drop'),
-             aes(xintercept = period_start), 
-             linetype = "dashed", color = "gray50", alpha = 0.5) +
-  scale_color_brewer(palette = "Set1", name = "Treatment") +
-  labs(
-    title = "Response by Observation Index and Treatment",
-    x = "Observation Index",
-    y = "Response (y)"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-
-# Add mean segments manually
-period_means <- dat %>% 
-  group_by(p, t) %>% 
-  summarise(start_idx = min(obs_index),
-            end_idx = max(obs_index),
-            mean_y = mean(y),
-            .groups = 'drop')
-
-for(i in 1:nrow(period_means)) {
-  p1 <- p1 + geom_segment(
-    x = period_means$start_idx[i], 
-    xend = period_means$end_idx[i],
-    y = period_means$mean_y[i], 
-    yend = period_means$mean_y[i],
-    color = RColorBrewer::brewer.pal(max(3, length(unique(dat$t))), "Set1")[period_means$t[i] + 1],
-    size = 1.2
-  )
-}
-
-# Plot 2: Mean response by period
-p2 <- ggplot(means_summary, aes(x = as.factor(p), y = mean_y, 
+# Plot Mean response by period
+plot1 <- ggplot(means_summary, aes(x = as.factor(p), y = mean_y, 
                                 color = as.factor(t), group = t)) +
   geom_line(linewidth = 1) +
   geom_point(linewidth = 3) +
@@ -116,22 +95,3 @@ p2 <- ggplot(means_summary, aes(x = as.factor(p), y = mean_y,
   ) +
   theme_minimal() +
   theme(legend.position = "bottom")
-
-# Plot 3: Faceted by period
-p3 <- ggplot(dat, aes(x = obs_index, y = y, color = as.factor(t))) +
-  geom_point(alpha = 0.4, size = 1) +
-  stat_smooth(method = "lm", se = FALSE, size = 1) +
-  facet_wrap(~ p, scales = "free_x", labeller = label_both) +
-  scale_color_brewer(palette = "Set1", name = "Treatment") +
-  labs(
-    title = "Response by Observation Index (Faceted by Period)",
-    x = "Observation Index",
-    y = "Response (y)"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "bottom")
-
-# Display plots
-print(p1)
-print(p2)
-print(p3)
