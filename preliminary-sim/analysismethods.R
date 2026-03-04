@@ -114,14 +114,27 @@ g_estimate <- function(data, trt = 1, dataset="ACA") {
 
 ################
 # aipw estimation
-aipw_estimate <- function(data, trt = 1, period_of_interest = NULL) {
+aipw_estimate <- function(data, trt = 1, dataset="ACA", population = NULL) {
   
   # Subset to relevant treatments
   cc_periods <- which(as.vector(table(data$t, data$p)[trt+1,])>0)
-  d <- subset(data, t %in% c(0,trt) & p %in% cc_periods) # by default ACA data
   
-  # cc_periods <- which(as.vector(table(data$t, data$p)[trt+1,])>0)
-  # d <- subset(data, p %in% cc_periods) # ECE data
+  # data to predict marginal means
+  if(dataset=="ACA"){
+    d <- subset(data, t %in% c(0,trt) & p %in% cc_periods) # by default ACA data
+  }
+  if(dataset=="LACA"){
+    d <- subset(data, t %in% c(0,trt) & p %in% max(cc_periods)) # LACA data
+  }
+  if(dataset=="ECE"){
+    d <- subset(data, p %in% cc_periods) # ECE data
+  }
+  if(dataset=="NCC"){
+    d <- data # NCC data
+    if(trt==1){
+      d <- subset(data, p %in% cc_periods) # ECE data
+    }
+  } 
   
   # Propensity scores: known from randomization
   # table(data$t, data$p)
@@ -140,7 +153,6 @@ aipw_estimate <- function(data, trt = 1, period_of_interest = NULL) {
     # assign propensity to each ind
     pi_hat[idx] <- prop[as.character(d$t[idx])]
   }
-  
   d$pi_hat <- pi_hat
   
   # Outcome model 
@@ -150,18 +162,31 @@ aipw_estimate <- function(data, trt = 1, period_of_interest = NULL) {
   d$mu_hat_0 <- predict(fit, newdata = transform(d, t = factor(0, levels = levels(d$t))))
   d$mu_hat_a <- predict(fit, newdata = transform(d, t = factor(trt, levels = levels(d$t))))
   
+  # If population is specified, subset and stabilize
+  if (!is.null(population)) {
+    # I_P <- which(d$p %in% period_of_interest) 
+    # d_int <- d[I_P,]
+    
+    if(population=="ACA"){
+      d_int <- subset(d, t %in% c(0,trt) & p %in% cc_periods) # by default ACA data
+    }
+    if(population=="LACA"){
+      d_int <- subset(d, t %in% c(0,trt) & p %in% max(cc_periods)) # LACA data
+    }
+    if(population=="ECE"){
+      d_int <- subset(d, p %in% cc_periods) # ECE data
+    }
+    d_int[which(d_int$t==0),]$pi_hat <-  sum(d_int$t==0)/dim(d_int)[1]
+    d_int[which(d_int$t==trt),]$pi_hat <-  sum(d_int$t==trt)/dim(d_int)[1]
+    d <- d_int
+  }
+  
   # Compute individual contributions
   psi_i <- ((d$t == trt) / d$pi_hat) * (d$y - d$mu_hat_a) -
     ((d$t == 0) / d$pi_hat) * (d$y - d$mu_hat_0) +
     (d$mu_hat_a - d$mu_hat_0)
   
-  # If period_of_interest is specified, subset and stabilize
-  if (!is.null(period_of_interest)) {
-    I_P <- which(d$p %in% period_of_interest) 
-    psi_hat <- mean(psi_i[I_P])
-  } else {
-    psi_hat <- mean(psi_i)
-  } 
+  psi_hat <- mean(psi_i)
   
   # # Mean and SD
   # psi_hat <- mean(psi_i)
@@ -189,16 +214,16 @@ aipw_estimate <- function(data, trt = 1, period_of_interest = NULL) {
 #   mu0 = 0,
 #   mu1 = 1,
 #   mu2 = 2,
-#   beta=2,
+#   beta = 2,
 #   N1 = 120,
 #   N2 = 300,
 #   N3 = 200,
-#   alloc1 = c(2/3, 1/3),        # 2:1
-#   alloc2 = c(3/6, 2/6, 1/6),   # 3:2:1
-#   alloc3 = c(4/5, 1/5),
-#   # alloc1 = rep(1,2)*1/2, # eq alloc
-#   # alloc2 = rep(1,3)*1/3, # eq alloc
-#   # alloc3 = rep(1,2)*1/2, # eq alloc
+#   # alloc1 = c(2/3, 1/3),        # 2:1
+#   # alloc2 = c(3/6, 2/6, 1/6),   # 3:2:1
+#   # alloc3 = c(4/5, 1/5),
+#   alloc1 = rep(1,2)*1/2, # eq alloc
+#   alloc2 = rep(1,3)*1/3, # eq alloc
+#   alloc3 = rep(1,2)*1/2, # eq alloc
 #   lambda = 0.5
 # )
 # 
@@ -211,6 +236,7 @@ aipw_estimate <- function(data, trt = 1, period_of_interest = NULL) {
 # 
 # # aipw
 # aipw_estimate(dat, trt = 1)
+# aipw_estimate(dat, trt = 2, dataset = "NCC", population = "ACA")
 # aipw_estimate(dat, trt = 1, period_of_interest = c(1,2))
 # aipw_estimate(dat, trt = 1, period_of_interest = c(2))
 # aipw_estimate(dat, trt = 1, period_of_interest = c(1,2,3))

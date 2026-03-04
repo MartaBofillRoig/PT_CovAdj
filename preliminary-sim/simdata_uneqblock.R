@@ -108,10 +108,10 @@ simdata_blocked_unequal <- function(
   
   if(subgroup==T){
     # Two subgroups based on a covariate
-    x1 <- rnorm(N, mean = 0, sd = 1)
-    x2 <- rnorm(N, mean = 2, sd = 1)
+    x1 <- rnorm(N, mean = 0, sd = 1/2)
+    x2 <- rnorm(N, mean = 3, sd = 1/2)
     # Proportion of subgroup per period
-    p1_x1 <- 0.5
+    p1_x1 <- 0.8
     p2_x1 <- 0.4
     p3_x1 <- 0.2
     

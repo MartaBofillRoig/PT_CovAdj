@@ -1,13 +1,13 @@
 ################
 # NCC Cov adj
 # SMALL SIM
-# Feb 2026
+# March 2026
 ################
 
 rm(list=ls())
 
-# setwd("C:/Users/marta.bofill/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
-setwd("C:/Users/marta/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
+setwd("C:/Users/marta.bofill/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
+# setwd("C:/Users/marta/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
 
 ################
 
@@ -191,7 +191,7 @@ scenarios <- list(
   list(name = "Unequal alloc, no trend, cov-period interaction (h1)",
        mu0 = 0, mu1 = 1, mu2 = 2,      # treatment main effects
        beta = 2,                        # baseline covariate effect
-       gamma1 = 0, gamma2 = 0,          # treatment-covariate interactions
+       gamma1 = 2, gamma2 = 0,          # treatment-covariate interactions
        delta = 0, subgroup = T,         # period-covariate interaction
        tau1 = 0, tau2 = 0,              # treatment-period interactions
        N1 = n* 100, N2 = n* 100, N3 = n* 100,
@@ -232,14 +232,15 @@ scenarios <- list(
 contrasts <- list(c(1,0), c(2,0))
 
 # --- function to save results in dataframe ---
-add_result <- function(results, sc, trt, method, dataset, out) {
+add_result <- function(results, sc, trt, method, dataset, population, out) {
   rbind(
     results,
     data.frame(
       Scenario = sc$name,
       Contrast = trt,
       Method   = method,
-      Dataset  = dataset, 
+      Dataset  = dataset,
+      Pop      = population,
       Est      = out["est"],
       Var      = out["var"],
       SE       = out["se"],
@@ -271,32 +272,40 @@ for (sc in scenarios) {
     trt <- ctr[1]
     
     ## --- Linear model ---
-    results <- add_result(results, sc, trt, "LM", "ACA", 
+    results <- add_result(results, sc, trt, "LM", "ACA", "ACA",
                           lmmodel(dat, trt = trt, dataset = "ACA"))
     
-    results <- add_result(results, sc, trt, "LM", "ECE",
+    results <- add_result(results, sc, trt, "LM", "ECE", "ECE",
                           lmmodel(dat, trt = trt, dataset = "ECE"))
     
-    results <- add_result(results, sc, trt, "LM", "NCC",
+    results <- add_result(results, sc, trt, "LM", "NCC", "NCC",
                           lmmodel(dat, trt = trt, dataset = "NCC"))
     
     ## --- G-estimation ---
-    results <- add_result(results, sc, trt, "G", "ACA",
+    results <- add_result(results, sc, trt, "G", "ACA", "ACA",
                           g_estimate(dat, trt = trt, dataset = "ACA"))
     
-    results <- add_result(results, sc, trt, "G", "ECE",
+    results <- add_result(results, sc, trt, "G", "ECE", "ECE",
                           g_estimate(dat, trt = trt, dataset = "ECE"))
     
-    results <- add_result(results, sc, trt, "G", "NCC",
+    results <- add_result(results, sc, trt, "G", "NCC", "NCC", 
                           g_estimate(dat, trt = trt, dataset = "NCC"))
     
     ## --- AIPW ---
-    results <- add_result(results, sc, trt, "AIPW", "ACA",
-                          aipw_estimate(dat, trt = trt))
+    results <- add_result(results, sc, trt, "AIPW", "ACA", "ACA",
+                          aipw_estimate(dat, trt = trt, dataset="ACA", population = NULL)) 
     
-    results <- add_result(results, sc, trt, "AIPW", "LACA",
-                          aipw_estimate(dat, trt = trt,
-                                        period_of_interest = trt + 1))
+    results <- add_result(results, sc, trt, "AIPW", "ECE", "ACA",
+                          aipw_estimate(dat, trt = trt, dataset="ECE", population = "ACA")) 
+    
+    results <- add_result(results, sc, trt, "AIPW", "ECE", "ECE",
+                          aipw_estimate(dat, trt = trt, dataset="ECE", population = NULL)) 
+    
+    results <- add_result(results, sc, trt, "AIPW", "NCC", "ECE",
+                          aipw_estimate(dat, trt = trt, dataset="NCC", population = "ECE")) 
+    
+    results <- add_result(results, sc, trt, "AIPW", "ECE", "LACA",
+                          aipw_estimate(dat, trt = trt, dataset="ECE", population = "LACA"))
   }
 }
 

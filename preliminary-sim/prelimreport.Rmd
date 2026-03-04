@@ -1,0 +1,279 @@
+---
+title: "Preliminar results" 
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: flatly
+    toc: yes
+    toc_float:
+      collapsed: true
+---
+
+```{r setup, include=FALSE}
+library(kableExtra)
+library(knitr)
+library(dplyr)
+# 
+knitr::opts_chunk$set(echo = TRUE)
+setwd("C:/Users/marta.bofill/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim")
+load("C:/Users/marta.bofill/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim/preliminary-smallsim.RData")
+results$Scenario <- factor(results$Scenario, levels = unique(results$Scenario))
+```
+
+## Scenarios
+
+
+```{r} 
+scenarios_df <- do.call(rbind, lapply(scenarios, function(s) {
+  data.frame(
+    Scenario  = s$name,
+    mu0 = s$mu0, mu1 = s$mu1, mu2 = s$mu2,
+    beta = s$beta,
+    gamma1 = s$gamma1, gamma2 = s$gamma2,
+    delta = s$delta, subgroup = s$subgroup,
+    tau1 = s$tau1, tau2 = s$tau2,
+    N1 = s$N1/n, N2 = s$N2/n, N3 = s$N3/n,   # divide by n to keep it readable
+    alloc1 = paste(round(s$alloc1, 2), collapse = "/"),
+    alloc2 = paste(round(s$alloc2, 2), collapse = "/"),
+    alloc3 = paste(round(s$alloc3, 2), collapse = "/"),
+    lambda = s$lambda#,
+    # trendp = s$trendp,
+    # sd = s$sd
+  )
+}))
+
+kable(scenarios_df, booktabs = TRUE, digits = 3, row.names = FALSE, caption = "Simulation scenarios. In all scenarios, stepwise and sd=1.") %>%
+  kable_styling(latex_options = c("scale_down", "hold_position"), bootstrap_options = c("striped", "bordered"))  
+```
+
+
+## Results of 1 trial with large sample size
+
+
+
+### BASELINE SCENARIOS
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[1]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[2]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[3]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[4]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[5]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+
+
+### COVARIATE EFFECTS
+
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[6]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[7]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[8]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+
+### COVARIATE-PERIOD INTERACTIONS
+
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[9]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[10]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+ 
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[11]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+ 
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[12]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+  
+ 
+### TREATMENT-PERIOD INTERACTIONS
+ 
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[13]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+ 
+```{r}
+results %>%
+  filter(Scenario == levels(results$Scenario)[14]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+
+## Simulation study
+
+```{r}
+load("C:/Users/marta.bofill/Dropbox/C5/GitHub/PT_CovAdj/preliminary-sim/simulation_results.RData")
+```
+
+
+### BASELINE SCENARIOS
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[1]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[2]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[3]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[4]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[5]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+
+
+### COVARIATE EFFECTS
+
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[6]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[7]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[8]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+
+### COVARIATE-PERIOD INTERACTIONS
+
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[9]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[10]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+ 
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[11]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+ 
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[12]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+  
+ 
+### TREATMENT-PERIOD INTERACTIONS
+ 
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[13]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+ 
+```{r}
+summary_stats[,-6] %>%
+  filter(Scenario == levels(summary_stats[,-6]$Scenario)[14]) %>%
+  kable(booktabs = TRUE, digits = 3, row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "bordered"))  # adds all grid lines
+```
+
