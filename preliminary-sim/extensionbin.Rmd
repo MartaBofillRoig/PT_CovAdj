@@ -1,0 +1,175 @@
+---
+title: "Extension to binary endpoints" 
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: flatly
+    toc: yes
+    toc_float:
+      collapsed: true
+---
+
+# G-Estimation for Binary Outcomes (Logistic Regression)
+
+## Overview
+
+This document extends the linear G-estimation function to binary outcomes using logistic regression. The key challenge is that the **linear contrast vector trick** used in `lm()` no longer works — it exploits the fact that `g = Xβ` is linear, so `mean(X1 - X0) · β` gives you the ATE directly. With logistic regression, the link function is nonlinear (`1 / (1 + e^{-Xβ})`), so predictions must be made on the probability scale and the variance must be computed via a numerical gradient.
+
+---
+
+## Full Code
+
+```r
+g_estimate_binary <- function(data, trt = 1, dataset = "ACA") {
+  
+  cc_periods <- which(as.vector(table(data$t, data$p)[trt + 1, ]) > 0)
+  
+  # analysis data (identical subsetting logic as linear version)
+  if (dataset == "ACA") {
+    d <- subset(data, t %in% c(0, trt) & p %in% cc_periods)
+  }
+  if (dataset == "LACA") {
+    d <- subset(data, t %in% c(0, trt) & p %in% max(cc_periods))
+  }
+  if (dataset == "ECE") {
+    d <- subset(data, p %in% cc_periods)
+  }
+  if (dataset == "NCC") {
+    d <- data
+    if (trt == 1) {
+      d <- subset(data, p %in% cc_periods)
+    }
+  }
+  
+  # outcome model
+  fit <- glm(y ~ as.factor(t) + as.factor(p) + x, data = d,
+             family = binomial(link = "logit"))
+  
+  # G-computation: predict on probability scale
+  d1 <- transform(d, t = factor(trt, levels = levels(as.factor(d$t))))
+  d0 <- transform(d, t = factor(0,   levels = levels(as.factor(d$t))))
+  
+  p1 <- predict(fit, newdata = d1, type = "response")  # P(y=1 | t=trt, x)
+  p0 <- predict(fit, newdata = d0, type = "response")  # P(y=1 | t=0,   x)
+  
+  g_diffmeans <- mean(p1 - p0)
+  
+  # Variance via delta method (numerical gradient)
+  beta_hat <- coef(fit)
+  
+  g_func <- function(beta) {
+    fit_tmp <- fit
+    fit_tmp$coefficients <- beta
+    p1_tmp <- predict(fit_tmp, newdata = d1, type = "response")
+    p0_tmp <- predict(fit_tmp, newdata = d0, type = "response")
+    mean(p1_tmp - p0_tmp)
+  }
+  
+  grad   <- numDeriv::grad(g_func, beta_hat)
+  Vbeta  <- vcov(fit)
+  g_var  <- as.numeric(t(grad) %*% Vbeta %*% grad)
+  g_se   <- sqrt(g_var)
+  
+  # estimand  
+  esd_m <- as.numeric(colMeans(d[2 + as.numeric(trt)])) - mean(d$y0)
+  
+  return(c(est = g_diffmeans, var = g_var, se = g_se, esd_m = esd_m))
+}
+```
+
+---
+
+## G-Computation
+
+Instead of using a contrast vector, we predict on the probability scale directly:
+
+```r
+d1 <- transform(d, t = factor(trt, levels = levels(as.factor(d$t))))
+d0 <- transform(d, t = factor(0,   levels = levels(as.factor(d$t))))
+
+p1 <- predict(fit, newdata = d1, type = "response")  # P(y=1 | t=trt, x)
+p0 <- predict(fit, newdata = d0, type = "response")  # P(y=1 | t=0,   x)
+
+g_diffmeans <- mean(p1 - p0)
+```
+
+For each observation in `d`, we ask two counterfactual questions:
+
+- *What is the predicted probability of y=1 if this person were treated?*
+- *What is the predicted probability of y=1 if this person were untreated?*
+
+We then average the individual differences, obtaining the ATE estimate on the probability scale.
+
+---
+
+## Variance: Delta Method 
+
+### The Core Problem
+
+`g_diffmeans` is a nonlinear function of the coefficients β. We want `Var(g_diffmeans)`, but `vcov(fit)` only gives us `Var(β̂)`. The **delta method** bridges the two:
+
+$$\text{Var}(g(\hat{\beta})) \approx \nabla g(\hat{\beta})^\top \cdot \text{Var}(\hat{\beta}) \cdot \nabla g(\hat{\beta})$$
+
+The gradient `∇g` acts as a local scaling factor — it tells you how sensitive the ATE estimate is to small perturbations in each coefficient.
+
+**Notation note:** The `g` in `g(β)` here is a mathematical function for "the ATE estimate expressed as a function of the coefficients β", and it is not the same as G-computation (as a procedure): here β is treated as a fixed input to be evaluated at, not estimated from data.  It is defined as `mean(p1 - p0)`, where `p1` and `p0` are themselves functions of β. Note also that `g(β)` has nothing to do with the logit link function — the link is applied internally by `predict(..., type = "response")` and is already resolved by the time `g` receives the predicted probabilities.
+
+
+### Step 1 — Define g as a function of β
+
+```r
+g_func <- function(beta) {
+  fit_tmp <- fit
+  fit_tmp$coefficients <- beta       
+  p1_tmp <- predict(fit_tmp, newdata = d1, type = "response")
+  p0_tmp <- predict(fit_tmp, newdata = d0, type = "response")
+  mean(p1_tmp - p0_tmp)  
+}
+```
+
+This computes the ATE estimate given the coefficients. It is the function we want to differentiate.
+
+### Step 2 — Numerical gradient
+
+`numDeriv::grad` calculates the gradient of a function by numerical approximation.
+
+```r
+grad <- numDeriv::grad(g_func, beta_hat)
+```
+
+`numDeriv::grad` evaluates `g_func` at `beta_hat + h * e_j` for each coefficient j in turn, computing:
+
+$$\frac{\partial g}{\partial \beta_j} \approx \frac{g(\hat{\beta} + h \cdot e_j) - g(\hat{\beta})}{h}$$
+
+The result is a vector of length p (number of coefficients).  
+
+### Step 3 — Sandwich formula
+
+```r
+Vbeta <- vcov(fit)                          # p×p covariance matrix of β̂
+g_var <- as.numeric(t(grad) %*% Vbeta %*% grad)   # scalar
+g_se  <- sqrt(g_var)
+```
+
+Written out dimensionally:
+
+$$\text{Var}(\hat{g}) = \underbrace{\nabla g^\top}_{1 \times p} \cdot \underbrace{V_\beta}_{p \times p} \cdot \underbrace{\nabla g}_{p \times 1} = \text{scalar}$$
+
+This propagates uncertainty from β̂ through the nonlinear function g.
+
+---
+
+## The Estimand: `esd_m`
+
+```r
+esd_m <- as.numeric(colMeans(d[2 + as.numeric(trt)])) - mean(d$y0)
+```
+
+If `y0` and `y1` are the true counterfactual outcomes, then:
+
+$$ATE = E[Y_1 - Y_0] = E[Y_1] - E[Y_0] = \bar{Y}_1 - \bar{Y}_0$$
+
+No model needed. This is the **oracle estimand**.
+<!-- — the ground truth against which the model-based estimates (`est`, `se`) are evaluated across simulation replications to measure bias, variance, and MSE. -->
+
+
